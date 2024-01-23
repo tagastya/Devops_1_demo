@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: nextjs-depl
+  namespace: bbuy
+  labels:
+    app: bbuy-app
+spec: 
+  replicas: 3
+  selector:  
+    matchLabels: 
+      app: bbuy-app
+  template: 
+    metadata: 
+      labels: 
+        app: bbuy-app
+    spec: 
+      containers: 
+        - name: nextjs
+          image: 974403022047.dkr.ecr.us-east-1.amazonaws.com/nextjsapp
+          imagePullPolicy: IfNotPresent
+
+--- 
+apiVersion: v1
+kind: Service 
+metadata:  
+  name: nextjs-srv-cluster
+  namespace: bbuy  
+spec: 
+  type: ClusterIP
+  selector: 
+    app: bbuy-app
+  ports: 
+    - name: nextjs-cluster-ip
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+  
+--- 
+
+apiVersion: v1
+kind: Service
+metadata:  
+  namespace: bbuy
+  name: nextjs-lb-srv
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  selector: 
+    app: bbuy-app
+  type: LoadBalancer
